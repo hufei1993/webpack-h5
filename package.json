@@ -1,7 +1,7 @@
 {
-  "name": "webpack-fullseries-tool",
+  "name": "webpack-h5",
   "version": "1.0.0",
-  "description": "webpack full series tool for Front-end Engineer",
+  "description": "webpack开发h5",
   "private": true,
   "scripts": {
     "start": "cross-env NODE_ENV=development node server.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hufei1993/webpack-fullseries-tool.git"
+    "url": "https://github.com/hufei1993/webpack-h5.git"
   },
   "keywords": [
     "webpack",
