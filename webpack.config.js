@@ -3,77 +3,56 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const hotMiddlewareScript = 'webpack-hot-middleware/client?reload=true';
-const MinifyPlugin = require("babel-minify-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MinifyPlugin = require('babel-minify-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 console.log('NODE_ENV: ', process.env.NODE_ENV);
 let config = {
-  entry: {
-
-  },
+  entry: {},
   output: {},
   plugins: [
     new HtmlWebpackPlugin({
       template: 'index.html'
     }),
-    new CopyWebpackPlugin([
-      {
-        from: 'src/static/',
-        to: 'static/',
-        toType: 'dir'
-      }
-    ], {
-
-    }),
+    new CopyWebpackPlugin(
+      [
+        {
+          from: 'src/static/',
+          to: 'static/',
+          toType: 'dir'
+        }
+      ],
+      {}
+    ),
     new ManifestPlugin({
-      fileName:'assets/static_list.json',
-      filter:function (obj) {
-        return obj.path.indexOf('assets/')>-1
+      fileName: 'assets/static_list.json',
+      filter: function(obj) {
+        return obj.path.indexOf('assets/') > -1;
       }
-    }),
-
+    })
   ],
   resolve: {
     alias: {
       static: path.resolve(__dirname, './src/static'),
-      tools:path.resolve(__dirname, './src/tools'),
-      styles:path.resolve(__dirname, './src/styles')
+      tools: path.resolve(__dirname, './src/tools'),
+      styles: path.resolve(__dirname, './src/styles')
     },
-    extensions: ['.js', '.json','.tsx', '.ts',]
+    extensions: ['.js', '.json', '.tsx', '.ts']
   },
   externals: [],
   stats: {
     colors: true,
-    modules: false,
+    modules: false
   },
   module: {
     rules: [
       {
         test: /\.js|jsx$/,
         exclude: /node_modules/,
-        use: [
-          "babel-loader"
-        ]
-      },{
-        test: /\.scss$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'postcss-loader',
-          'sass-loader'
-        ]
-      },
-      {
-        test: /\.less$/,
-        use: [{
-          loader: "style-loader"
-        }, {
-          loader: "css-loader"
-        }, {
-          loader: "less-loader"
-        }]
+        use: ['babel-loader']
       },
       {
         test: /\.tsx?$/,
@@ -84,18 +63,18 @@ let config = {
         test: /\.(png|svg|jpg|gif)$/,
         use: [
           {
-            loader:'file-loader',
+            loader: 'file-loader',
             options: {
-              name:'assets/[hash].[ext]',
-              publicPath:'../',
+              name: 'assets/[hash].[ext]',
+              publicPath: '../'
             }
           },
           {
-            loader: 'image-webpack-loader',// minifying your images
+            loader: 'image-webpack-loader', // minifying your images
             options: {
-              bypassOnDebug: true,
-            },
-          },
+              bypassOnDebug: true
+            }
+          }
         ]
       },
       {
@@ -112,37 +91,30 @@ let config = {
       },
       {
         test: /\.(csv|tsv)$/,
-        use: [
-          'csv-loader'
-        ]
+        use: ['csv-loader']
       },
       {
         test: /\.xml$/,
-        use: [
-          'xml-loader'
-        ]
+        use: ['xml-loader']
       }
     ]
   }
 };
-if(process.env.NODE_ENV==='development'){
+if (process.env.NODE_ENV === 'development') {
   config.entry = {
-    index: [
-      hotMiddlewareScript,
-      './src/index'
-    ]
+    index: [hotMiddlewareScript, './src/index']
   };
   config.output.publicPath = '/';
   config.devtool = 'eval-source-map';
-// config.devtool = 'cheap-eval-source-map';//转换过的代码（仅限行）
+  // config.devtool = 'cheap-eval-source-map';//转换过的代码（仅限行）
   config.mode = 'development';
-  config.optimization={
-    noEmitOnErrors:true
+  config.optimization = {
+    noEmitOnErrors: true
   };
   config.plugins = config.plugins.concat(
     new webpack.HotModuleReplacementPlugin()
   );
-  config.module.rules=config.module.rules.concat(
+  config.module.rules = config.module.rules.concat(
     {
       test: /\.css$/,
       use: [
@@ -156,40 +128,56 @@ if(process.env.NODE_ENV==='development'){
         'postcss-loader'
       ]
     },
+    {
+      test: /\.scss$/,
+      use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
+    },
+    {
+      test: /\.less$/,
+      use: [
+        {
+          loader: 'style-loader'
+        },
+        {
+          loader: 'css-loader'
+        },
+        {
+          loader: 'less-loader'
+        }
+      ]
+    }
   );
-}else{
+} else {
   config.entry = {
-    index: [
-      './src/index'
-    ]
+    index: ['./src/index']
   };
   config.plugins = config.plugins.concat(
     new CleanWebpackPlugin(['dist']),
     new MinifyPlugin(),
     new MiniCssExtractPlugin({
-      filename: "css/[name].css",
-      chunkFilename: "css/[name].css"
+      filename: 'css/[name].[id].css',
+      chunkFilename: 'css/[name].[id].css'
     })
   );
   config.mode = 'production';
   config.output = {
     filename: 'js/[name].[hash].js',
     chunkFilename: 'js/[name].[hash].js',
-    hashDigestLength:10,
+    hashDigestLength: 10,
     path: path.resolve(__dirname, 'dist'),
-    publicPath: "",//相对于HTML页面解析的输出目录的url
+    publicPath: '' //相对于HTML页面解析的输出目录的url
   };
-  config.optimization={
-    splitChunks:{
-      chunks:'all',
-      name:'common'
+  config.optimization = {
+    splitChunks: {
+      chunks: 'all',
+      name: 'common'
     },
-    runtimeChunk:{
-      name:'runtime'
+    runtimeChunk: {
+      name: 'runtime'
     }
   };
   config.cache = true;
-  config.module.rules=config.module.rules.concat(
+  config.module.rules = config.module.rules.concat(
     {
       test: /\.css$/,
       use: [
@@ -203,7 +191,30 @@ if(process.env.NODE_ENV==='development'){
         'postcss-loader'
       ]
     },
+    {
+      test: /\.less$/,
+      use: [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+        {
+          loader: 'postcss-loader'
+        },
+        'less-loader'
+      ]
+    },
+    {
+      test: /\.scss$/,
+      use: [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+        {
+          loader: 'postcss-loader'
+        },
+        'sass-loader'
+      ]
+    }
   );
 }
-process.env.NODE_ENV === 'analyze' && config.plugins.push(new BundleAnalyzerPlugin());
+process.env.NODE_ENV === 'analyze' &&
+  config.plugins.push(new BundleAnalyzerPlugin());
 module.exports = config;
